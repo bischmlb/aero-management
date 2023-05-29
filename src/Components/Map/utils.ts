@@ -8,8 +8,11 @@ enum EArea {
     ATTENTION = 'attention'
 }
 
-/* Seems vite type casts json obj to some weird module type. So we type cast */
-const ZONES = zones as { readonly default: GeoJSON.FeatureCollection }
+/**
+ * Seems vite type casts json obj to some weird module type. So we type cast
+ * https://github.com/microsoft/TypeScript/issues/28067
+ **/
+const ZONES = zones as unknown as { readonly default: GeoJSON.FeatureCollection }
 
 // Area scheme definitions
 const areaScheme = {
