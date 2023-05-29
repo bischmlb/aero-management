@@ -1,0 +1,40 @@
+#root {
+  margin: 0 auto;
+  text-align: center;
+  color: #fff;
+}
+
+
+body {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+
+$nav-width: 50px;
+
+
+
+.app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+
+  .map {
+    flex: 10;
+    // margin-left: $nav-width;
+  }
+
+  .map-container {
+    //width: calc(100% - $nav-width);
+    // margin-left: $nav-width;
+    width: 100%;
+    height: 100%;
+    // Needed on child
+    overflow-x: hidden;
+    position: absolute;
+  
+  }
+}
+

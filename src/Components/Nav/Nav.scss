@@ -1,0 +1,76 @@
+@import '../../App.scss';
+
+
+.nav {
+    position: fixed;
+    // https://stackoverflow.com/questions/2861247/center-aligning-a-fixed-position-div
+    left: 50%;
+    top: 100%;
+    transform: translate(-50%, -100%);
+    flex: 1;
+    z-index: 1;
+    background-color: rgba(0,0,0,0.5); 
+    min-width: $nav-width;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    transition: 0.5s; 
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    box-shadow: 0 0px 6px 0 rgba(0,0,0,5);
+    backdrop-filter: blur(10px);
+
+
+    &-header{
+      border-bottom: 2px solid #fff;
+      padding: 20px;
+      padding-top: 0;
+      margin: 0 10px;
+    }
+
+    &-content {
+
+        display: flex;
+        
+    }
+
+    &-item {
+        margin: 0rem 0.5rem;
+        display: flex;
+        justify-content: center;
+        transition: 0.2s;
+        color: #fff;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding: 1.1rem 1.5rem;
+        font-size: 18px;
+
+
+        // Dont want distance to sites on edge childs
+        &:last-child {
+            margin-right: 0;
+        }
+
+        &:first-child {
+            margin-left: 0;
+        }
+
+        &:hover {
+            color: #222;
+            background-color: #fff;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            cursor: pointer;
+        }
+
+        &-active {
+            @extend .nav-item;
+            color: #222;
+            background-color: #fff;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+    }
+
+  }
