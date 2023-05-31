@@ -1,5 +1,7 @@
 import mapboxgl, { FillLayer } from "mapbox-gl";
 import * as zones from '../../assets/zones/zones.json'
+import buffer from '@turf/buffer'
+import * as helpers from '@turf/helpers'
 
 enum EArea {
     DANGER = 'danger',
@@ -9,7 +11,8 @@ enum EArea {
 }
 
 /**
- * Seems vite type casts json obj to some weird module type. So we type cast
+ * Seems vite casts json obj to some weird module type. So we type cast
+ * If you dont type cast to unknown first you get 'TS2352: Coversion... If this was intentional, convert the expression to 'unknown' first.'
  * https://github.com/microsoft/TypeScript/issues/28067
  **/
 const ZONES = zones as unknown as { readonly default: GeoJSON.FeatureCollection }
@@ -31,7 +34,7 @@ const colorScheme = {
 }
 
 /**
- * Easy handle to create a new FeatureCollection source 
+ * create a new FeatureCollection source 
  **/
 const newSource = (features: Array<GeoJSON.Feature<GeoJSON.Geometry>>): mapboxgl.AnySourceData => {
     return {
@@ -43,26 +46,32 @@ const newSource = (features: Array<GeoJSON.Feature<GeoJSON.Geometry>>): mapboxgl
 }
 
 /**
- * Convert points from static zones into buffer zones with point as centroid 
- */
-const pointsToBufferZones = () => {
-    // TODO still missing private runways and stuff which is represented as "Point" typeId in json
-}
-
-/**
  * Handle zones and classify them with their respective color schemes.
  * Return respective {@link mapboxgl.AnyLayer} for each zone
  */
 const processZones = () => {
-    const zones = ZONES.default;
+    const zones: GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[] = [];
+
+    // Preprocess
+    ZONES.default.features.forEach((ft) => {
+        // Add buffers to points
+        if(ft.geometry.type === 'Point'){
+            const pointToBuff = buffer(ft, 3, {units: 'kilometers'} )
+            zones.push(pointToBuff)
+        }
+        zones.push(ft)
+    })
 
     /* AREA INITIALIZATIONS. TODO: optimize to one loop. THIS SHIT SUCKS ON PERF*/
-    const danger = {id: EArea.DANGER, type: 'fill', source: EArea.DANGER, features: zones.features.filter((ft) => areaScheme[EArea.DANGER].includes(ft.properties?.typeId))}
-    const security = {id: EArea.SECURITY, type: 'fill', source: EArea.SECURITY, features: zones.features.filter((ft) => areaScheme[EArea.SECURITY].includes(ft.properties?.typeId))}
-    const nature = {id: EArea.NATURE, type: 'fill', source: EArea.NATURE, features: zones.features.filter((ft) => areaScheme[EArea.NATURE].includes(ft.properties?.typeId))}
-    const attention = {id: EArea.ATTENTION, type: 'fill', source: EArea.ATTENTION, features: zones.features.filter((ft) => areaScheme[EArea.ATTENTION].includes(ft.properties?.typeId))}
+    const danger = {id: EArea.DANGER, type: 'fill', source: EArea.DANGER, features: zones.filter((ft) => areaScheme[EArea.DANGER].includes(ft.properties?.typeId))}
+    const security = {id: EArea.SECURITY, type: 'fill', source: EArea.SECURITY, features: zones.filter((ft) => areaScheme[EArea.SECURITY].includes(ft.properties?.typeId))}
+    const nature = {id: EArea.NATURE, type: 'fill', source: EArea.NATURE, features: zones.filter((ft) => areaScheme[EArea.NATURE].includes(ft.properties?.typeId))}
+    const attention = {id: EArea.ATTENTION, type: 'fill', source: EArea.ATTENTION, features: zones.filter((ft) => areaScheme[EArea.ATTENTION].includes(ft.properties?.typeId)) }
     
-    return [danger, security, nature, attention]
+
+
+    // Add most severe zones last, so they will be on top of other layers
+    return [attention, nature, security, danger]
 
 }
 
@@ -81,7 +90,7 @@ export const initMap = (options: mapboxgl.MapboxOptions): mapboxgl.Map => {
                 id: `${area.id}-layer`,
                 paint: {
                     "fill-color": colorScheme[area.id],
-                    "fill-opacity": 0.4
+                    "fill-opacity": 0.5
                 }
             } as FillLayer);    
         })

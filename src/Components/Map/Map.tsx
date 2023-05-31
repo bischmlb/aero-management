@@ -25,7 +25,7 @@ enum EMapType {
 export const Map: React.FC = () => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const [map, setMap] = useState<mapboxgl.Map>()
-    const [zoom, setZoom] = useState(6);
+    const [zoom, setZoom] = useState(6.7);
 
     const loading = useMemo(() => map?.loaded(), [map])
 
