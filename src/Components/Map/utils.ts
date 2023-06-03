@@ -1,4 +1,4 @@
-import mapboxgl, { FillLayer } from "mapbox-gl";
+import mapboxgl, { FillLayer, LineLayer } from "mapbox-gl";
 import * as zones from '../../assets/zones/zones.json'
 
 enum EArea {
@@ -51,10 +51,10 @@ const processZones = () => {
      const zones = ZONES.default.features;    
 
     /* AREA INITIALIZATIONS. TODO: optimize to one loop. THIS SHIT SUCKS ON PERF*/
-    const danger = {id: EArea.DANGER, type: 'fill', source: EArea.DANGER, features: zones.filter((ft) => areaScheme[EArea.DANGER].includes(ft.properties?.typeId))}
-    const security = {id: EArea.SECURITY, type: 'fill', source: EArea.SECURITY, features: zones.filter((ft) => areaScheme[EArea.SECURITY].includes(ft.properties?.typeId))}
-    const nature = {id: EArea.NATURE, type: 'fill', source: EArea.NATURE, features: zones.filter((ft) => areaScheme[EArea.NATURE].includes(ft.properties?.typeId))}
-    const attention = {id: EArea.ATTENTION, type: 'fill', source: EArea.ATTENTION, features: zones.filter((ft) => areaScheme[EArea.ATTENTION].includes(ft.properties?.typeId)) }
+    const danger = {id: EArea.DANGER, source: EArea.DANGER, features: zones.filter((ft) => areaScheme[EArea.DANGER].includes(ft.properties?.typeId))}
+    const security = {id: EArea.SECURITY, source: EArea.SECURITY, features: zones.filter((ft) => areaScheme[EArea.SECURITY].includes(ft.properties?.typeId))}
+    const nature = {id: EArea.NATURE, source: EArea.NATURE, features: zones.filter((ft) => areaScheme[EArea.NATURE].includes(ft.properties?.typeId))}
+    const attention = {id: EArea.ATTENTION, source: EArea.ATTENTION, features: zones.filter((ft) => areaScheme[EArea.ATTENTION].includes(ft.properties?.typeId)) }
     
 
     // Add most severe zones last, so they will be on top of other layers
@@ -74,12 +74,23 @@ export const initMap = (options: mapboxgl.MapboxOptions): mapboxgl.Map => {
             tmp_map.addSource(area.id, newSource(area.features))
             tmp_map.addLayer({
                 ...area,
-                id: `${area.id}-layer`,
+                id: `${area.id}-layer-fill`,
+                type: 'fill',
                 paint: {
                     "fill-color": colorScheme[area.id],
                     "fill-opacity": 0.3
                 }
-            } as FillLayer);    
+            } as FillLayer);
+            tmp_map.addLayer({
+                ...area,
+                id: `${area.id}-layer-line`,
+                type: 'line',
+                paint: {
+                    "line-color": colorScheme[area.id],
+                    "line-opacity": 1,
+                    "line-width": 1,
+                }
+            } as LineLayer);        
         })
     })
     return tmp_map
