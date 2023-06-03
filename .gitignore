@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+src/Components/Map/zoneScript.ts
+src/assets/zones/origin_zones.json

@@ -1,7 +1,5 @@
 import mapboxgl, { FillLayer } from "mapbox-gl";
 import * as zones from '../../assets/zones/zones.json'
-import buffer from '@turf/buffer'
-import * as helpers from '@turf/helpers'
 
 enum EArea {
     DANGER = 'danger',
@@ -20,9 +18,9 @@ const ZONES = zones as unknown as { readonly default: GeoJSON.FeatureCollection 
 // Area scheme definitions
 const areaScheme = {
     [EArea.DANGER]: ['airportMilitary2', 'airportMilitary8', 'hems1', 'hems2', 'aerodrome2', 'aerodrome5', 'airportCommercial5', 'airportCommercial2'],
-    [EArea.SECURITY]: ['military', 'embassy', 'castle', 'column3', 'prison',],
+    [EArea.SECURITY]: ['military', 'embassy', 'castle', 'column3', 'prison', 'bufferSecurity'],
     [EArea.NATURE]: ['nature'],
-    [EArea.ATTENTION]: ['gliderAerodrome3', 'waterAerodrome3', 'privateRunway3', 'parachute3', 'helipad1']
+    [EArea.ATTENTION]: ['gliderAerodrome3', 'waterAerodrome3', 'privateRunway3', 'parachute3', 'helipad1', 'bufferAttention']
 }
 
 // Color scheme definitions
@@ -50,17 +48,7 @@ const newSource = (features: Array<GeoJSON.Feature<GeoJSON.Geometry>>): mapboxgl
  * Return respective {@link mapboxgl.AnyLayer} for each zone
  */
 const processZones = () => {
-    const zones: GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[] = [];
-
-    // Preprocess
-    ZONES.default.features.forEach((ft) => {
-        // Add buffers to points
-        if(ft.geometry.type === 'Point'){
-            const pointToBuff = buffer(ft, 3, {units: 'kilometers'} )
-            zones.push(pointToBuff)
-        }
-        zones.push(ft)
-    })
+     const zones = ZONES.default.features;    
 
     /* AREA INITIALIZATIONS. TODO: optimize to one loop. THIS SHIT SUCKS ON PERF*/
     const danger = {id: EArea.DANGER, type: 'fill', source: EArea.DANGER, features: zones.filter((ft) => areaScheme[EArea.DANGER].includes(ft.properties?.typeId))}
@@ -68,7 +56,6 @@ const processZones = () => {
     const nature = {id: EArea.NATURE, type: 'fill', source: EArea.NATURE, features: zones.filter((ft) => areaScheme[EArea.NATURE].includes(ft.properties?.typeId))}
     const attention = {id: EArea.ATTENTION, type: 'fill', source: EArea.ATTENTION, features: zones.filter((ft) => areaScheme[EArea.ATTENTION].includes(ft.properties?.typeId)) }
     
-
 
     // Add most severe zones last, so they will be on top of other layers
     return [attention, nature, security, danger]
@@ -90,7 +77,7 @@ export const initMap = (options: mapboxgl.MapboxOptions): mapboxgl.Map => {
                 id: `${area.id}-layer`,
                 paint: {
                     "fill-color": colorScheme[area.id],
-                    "fill-opacity": 0.5
+                    "fill-opacity": 0.3
                 }
             } as FillLayer);    
         })
