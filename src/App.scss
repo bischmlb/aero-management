@@ -24,6 +24,7 @@ $nav-width: 50px;
   .map {
     flex: 10;
     // margin-left: $nav-width;
+    
   }
 
   .map-container {
@@ -38,3 +39,7 @@ $nav-width: 50px;
   }
 }
 
+// Find a nice solution for this, fine as long as we are in dev
+.mapboxgl-ctrl-logo {
+  display: none !important;
+}
